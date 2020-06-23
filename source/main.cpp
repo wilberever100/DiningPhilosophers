@@ -4,9 +4,8 @@
 #include <random>
 #include <thread>
 
-const int number_philosophers = 5;
-
-class DiningPhilosophers;
+const unsigned int kNumberPhilosophers = 5;
+const unsigned int kNumberActions = 1000;
 
 int get_random(int low, int high) {
   std::random_device rd;
@@ -15,11 +14,7 @@ int get_random(int low, int high) {
   return distribution(gen);
 }
 
-class Waitress {
- public:
-  Waitress();
-  virtual ~Waitress();
-};
+class DiningPhilosophers;
 
 struct Philosopher {
   Philosopher(unsigned int id, std::string name, unsigned int number_actions,
@@ -28,11 +23,12 @@ struct Philosopher {
 
   void operator()() {
     for (unsigned int i = 0; i < number_actions_; ++i) {
-      if (get_random(1, 2) < 2) {
-        Think();
-      } else {
-        Eat();
-      }
+      Eat();
+      // if (get_random(1, 2) < 2) {
+      //   Think();
+      // } else {
+      //   Eat();
+      // }
     }
   }
 
@@ -48,41 +44,42 @@ struct Philosopher {
 class DiningPhilosophers {
  public:
   DiningPhilosophers() {
-    std::thread t1(Philosopher(0, "Socrates", 10, this));
-    std::thread t2(Philosopher(1, "Plato", 10, this));
-    std::thread t3(Philosopher(2, "Aristotle", 10, this));
-    std::thread t4(Philosopher(3, "Descartes", 10, this));
-    std::thread t5(Philosopher(4, "Tomas", 10, this));
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
-    t5.join();
+    std::thread* philosophers[kNumberPhilosophers];
+    std::string philosopher_names[] = {
+        "Socrates", "Plato", "Aristotle", "Descartes", "Tomas",
+    };
+    for (unsigned int i = 0; i < kNumberPhilosophers; ++i) {
+      philosophers[i] = new std::thread(
+          Philosopher(i, philosopher_names[i], kNumberActions, this));
+    }
+    for (unsigned int i = 0; i < kNumberPhilosophers; ++i) {
+      philosophers[i]->join();
+    }
   }
 
   void PickFork(unsigned int id) {
     forks_[id].lock();
-    forks_[(id + 1) % number_philosophers].lock();
+    forks_[(id + 1) % kNumberPhilosophers].lock();
   }
 
   void LeaveFork(unsigned int id) {
     forks_[id].unlock();
-    forks_[(id + 1) % number_philosophers].unlock();
+    forks_[(id + 1) % kNumberPhilosophers].unlock();
   }
 
  private:
-  std::mutex forks_[number_philosophers];
+  std::mutex forks_[kNumberPhilosophers];
 };
 
 void Philosopher::Think() {
   std::cout << name_ + " is Thinking." << std::endl;
-  std::this_thread::sleep_for(std::chrono::seconds(get_random(1, 6)));
+  // std::this_thread::sleep_for(std::chrono::seconds(get_random(1, 6)));
 }
 
 void Philosopher::Eat() {
   table_->PickFork(id_);
-  std::cout << name_ + " is Eating" << std::endl;
-  std::this_thread::sleep_for(std::chrono::seconds(get_random(1, 6)));
+  std::cout << name_ + " is Eating." << std::endl;
+  // std::this_thread::sleep_for(std::chrono::seconds(get_random(1, 6)));
   table_->LeaveFork(id_);
 }
 

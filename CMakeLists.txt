@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRERD)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(Threads)
+
 include_directories($(CMAKE_CURRENT_SOURCE_DIR)/source)
 
 add_executable(dining_philosophers_problem source/main.cpp)
+target_link_libraries(dining_philosophers_problem Threads::Threads)
