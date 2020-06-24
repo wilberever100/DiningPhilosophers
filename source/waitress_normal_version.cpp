@@ -1,4 +1,3 @@
-// Copyright [year] <Copyright Owner
 #include <iostream>
 #include <mutex>
 #include <random>
@@ -109,7 +108,7 @@ private:
 		//con try_lock
 		Waitress* waiter_;
 		
-		
+};
 
 void Philosopher::Think() {
 	std::cout << name_ + " is Thinking." << std::endl;
